@@ -37,4 +37,7 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 
+	virtual void InitAbilityActorInfo();
+
+
 };
