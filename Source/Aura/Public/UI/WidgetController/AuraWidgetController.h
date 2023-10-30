@@ -19,7 +19,7 @@ struct FWidgetControllerParams
 	GENERATED_BODY()
 
 	FWidgetControllerParams() {}
-	FWidgetControllerParams(APlayerController* PC,APlayerState*PS,UAbilitySystemComponent* ASC,UAttributeSet * AS):
+	FWidgetControllerParams(APlayerController* PC,APlayerState*PS,UAbilitySystemComponent* ASC,UAttributeSet* AS):
 	PlayerController(PC) ,PlayerState(PS) , AbilitySystemComponent(ASC) , AttributeSet(AS) {}
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -48,6 +48,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetWidgetControllerParams(const FWidgetControllerParams& WCParams);
+	
+	UFUNCTION(BlueprintCallable)
 	virtual void BroadcastInitialValues();
 	virtual void BindCallBacksToDependencies();
 	

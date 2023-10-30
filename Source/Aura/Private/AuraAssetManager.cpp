@@ -6,7 +6,8 @@
 
 UAuraAssetManager& UAuraAssetManager::Get()
 {
-	check(GEngine)
+	check(GEngine);
+	
 	UAuraAssetManager* AuraAssetManager = Cast<UAuraAssetManager>(GEngine->AssetManager);
 	return *AuraAssetManager;
 }
