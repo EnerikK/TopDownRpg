@@ -142,11 +142,32 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	/*
 	 * Effects
 	 */
-	
 	//React
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag
 	(FName("Effects.HitReact"),
 	FString("Tag given when hit reacting"));
+
+	/*
+	 * Abilities
+	 */
+	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag
+	(FName("Abilities.Attack"),
+	FString("Attack Ability Tag"));
+
+	/*
+	* Montage
+	*/
+	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag
+	(FName("Montage.Attack.Weapon"),
+	FString("WeaponAttacks"));
+	
+	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag
+	(FName("Montage.Attack.RightHand"),
+	FString("RightHands Attacks"));
+	
+	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag
+	(FName("Montage.Attack.LeftHand"),
+	FString("LeftHand Attacks"));
 
 
 }
