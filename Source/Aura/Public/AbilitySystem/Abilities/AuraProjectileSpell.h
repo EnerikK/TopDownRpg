@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AuraDamageGameplayAbility.h"
-#include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AuraProjectileSpell.generated.h"
 
 
@@ -19,6 +18,9 @@ class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+
+
 protected:
 	virtual void ActivateAbility
 	(const FGameplayAbilitySpecHandle Handle,const FGameplayAbilityActorInfo* ActorInfo,
@@ -29,6 +31,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 NumProjectiles = 5;
 
 	
 	
