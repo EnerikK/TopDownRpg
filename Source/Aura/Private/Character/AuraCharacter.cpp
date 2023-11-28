@@ -2,11 +2,10 @@
 
 
 #include "Character/AuraCharacter.h"
-#include "Character/AuraCharacter.h"
-
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/Data/LvlUpInfo.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
@@ -30,9 +29,7 @@ AAuraCharacter::AAuraCharacter()
 	LevelUpNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("LevelUpNiagaraComponent");
 	LevelUpNiagaraComponent->SetupAttachment(GetRootComponent());
 	LevelUpNiagaraComponent->bAutoActivate = false;
-	
 
-	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f,400.f,0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -44,7 +41,6 @@ AAuraCharacter::AAuraCharacter()
 	bUseControllerRotationYaw = false;
 
 	CharacterClass = ECharacterClass::Elementalist;
-	
 }
 
 void AAuraCharacter::PossessedBy(AController* NewController)
@@ -174,6 +170,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+	OnAscRegistered.Broadcast(AbilitySystemComponent);
 
 	if(AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{

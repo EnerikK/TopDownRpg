@@ -24,8 +24,6 @@ struct AuraDamageStatics
 	DECLARE_ATTRIBUTE_CAPTUREDEF(ArcaneResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(PhysicalResistance);
 
-	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagToCaptureDefs;
-
 	AuraDamageStatics()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,Armor,Target,false);
@@ -39,20 +37,6 @@ struct AuraDamageStatics
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,LightningResistance,Target,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,ArcaneResistance,Target,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,PhysicalResistance,Target,false);
-
-		const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
-
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_Armor,ArmorDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_BlockChance,BlockChanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_ArmorPenetration,ArmorPenetrationDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitChance,CriticalHitChanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitResistance,CriticalHitResistanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitDamage,CriticalHitDamageDef);
-		
-		TagToCaptureDefs.Add(Tags.Attributes_Resistance_Fire,FireResistanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Resistance_Lightning,LightningResistanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Resistance_Arcane,ArcaneResistanceDef);
-		TagToCaptureDefs.Add(Tags.Attributes_Resistance_Physical,PhysicalResistanceDef);
 		
 	}
 	
@@ -79,9 +63,65 @@ UExecCalc_Damage::UExecCalc_Damage()
 
 }
 
-void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
-	FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams, const FGameplayEffectSpec& Spec, FAggregatorEvaluateParameters EvaluationParameters ,
+	const TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition>& InTagToDefs) const
 {
+	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	for(TTuple<FGameplayTag,FGameplayTag> Pair : GameplayTags.DamageTypesDebuffs)
+	{
+		const FGameplayTag& DamageType = Pair.Key;
+		const FGameplayTag& DebuffType = Pair.Value;
+		const float TypeDamage = Spec.GetSetByCallerMagnitude(DamageType, false,-1.f);
+		if(TypeDamage > -.5f) // .5 padding for floating point [im]precision
+		{
+			//Determine if there was a successful debuff
+			const float SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Chance,false,-1.f);
+
+			float TargetDebuffResistance = 0.f;
+			const FGameplayTag& ResistanceTag = GameplayTags.DamageTypesResistances[DamageType];
+			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(InTagToDefs[ResistanceTag],EvaluationParameters,TargetDebuffResistance);
+			TargetDebuffResistance = FMath::Max<float>(TargetDebuffResistance,0.f);
+			const float EffectiveDebuffChance = SourceDebuffChance  * ( 100 - TargetDebuffResistance ) / 100.f;
+			const bool bDebuff = FMath::RandRange(1,100) < EffectiveDebuffChance;
+			if(bDebuff)
+			{
+				FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+				
+				UAuraAbilitySystemLibrary::SetIsSuccessfulDebuff(ContextHandle,true);
+				UAuraAbilitySystemLibrary::SetDamageType(ContextHandle,DamageType);
+
+				const float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage,false,-1.f);
+				const float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration,false,-1.f);
+				const float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency,false,-1.f);
+
+				UAuraAbilitySystemLibrary::SetDebuffDamage(ContextHandle,DebuffDamage);
+				UAuraAbilitySystemLibrary::SetDebuffDuration(ContextHandle,DebuffDuration);
+				UAuraAbilitySystemLibrary::SetDebuffFrequency(ContextHandle,DebuffFrequency);
+				
+			}
+		}
+		
+	}
+}
+
+void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+                                              FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+{
+	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagToCaptureDefs;
+	
+	const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
+
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_Armor,DamageStatics().ArmorDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_BlockChance,DamageStatics().BlockChanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_ArmorPenetration,DamageStatics().ArmorPenetrationDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitChance,DamageStatics().CriticalHitChanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitResistance,DamageStatics().CriticalHitResistanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitDamage,DamageStatics().CriticalHitDamageDef);
+		
+	TagToCaptureDefs.Add(Tags.Attributes_Resistance_Fire,DamageStatics().FireResistanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Resistance_Lightning,DamageStatics().LightningResistanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Resistance_Arcane,DamageStatics().ArcaneResistanceDef);
+	TagToCaptureDefs.Add(Tags.Attributes_Resistance_Physical,DamageStatics().PhysicalResistanceDef);
 	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
 	const UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
 
@@ -106,6 +146,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
+
+	//Debuff
+	DetermineDebuff(ExecutionParams, Spec, EvaluationParameters,TagToCaptureDefs);
+
+	
 	//GetDamage Set By caller magnitude
 	float Damage = 0.f;
 	for(auto& Pair : FAuraGameplayTags::Get().DamageTypesResistances)
@@ -113,8 +158,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayTag DamageTypeTag = Pair.Key;
 		const FGameplayTag ResistanceTag = Pair.Value;
 		
-		checkf(AuraDamageStatics().TagToCaptureDefs.Contains(ResistanceTag),TEXT("TagsToCaptureDefs doesnt contain Tag: [%s] in ExecCalcDamage "),*ResistanceTag.ToString());
-		const FGameplayEffectAttributeCaptureDefinition CaptureDef = AuraDamageStatics().TagToCaptureDefs[ResistanceTag];
+		checkf(TagToCaptureDefs.Contains(ResistanceTag),TEXT("TagsToCaptureDefs doesnt contain Tag: [%s] in ExecCalcDamage "),*ResistanceTag.ToString());
+		const FGameplayEffectAttributeCaptureDefinition CaptureDef = TagToCaptureDefs[ResistanceTag];
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key,false,0);
 		
