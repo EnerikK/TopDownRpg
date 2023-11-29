@@ -42,7 +42,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	
 	Projectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 	
-	//GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,FString::Printf(TEXT("FireBolt Damage: %f"),ScaledDamage));
-	Projectile->FinishSpawning(SpawnTransform);
 	
+	Projectile->FinishSpawning(SpawnTransform);
+	//GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,FString::Printf(TEXT("FireBolt Damage: %f"),ScaledDamage));
 }

@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
@@ -82,6 +83,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		bTargeting = ThisActor  ? true : false;
 		bAutoRunning = false;
 	}
+	if(GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 	
 }
 
@@ -98,7 +100,6 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	
 	if(!bTargeting && !bShiftKeyDown)
 	{
-		if(GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
 		const APawn* ControlledPawn = GetPawn();
 		if(FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
@@ -111,9 +112,13 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					Spline->AddSplinePoint(PointLoc,ESplineCoordinateSpace::World);
 					//DrawDebugSphere(GetWorld(),PointLoc,8.f,8,FColor::Green,false,5.f);
 				}
-				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num()-1];
-				bAutoRunning = true;
+				if(NavPath->PathPoints.Num() > 0)
+				{
+					CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num()-1];
+					bAutoRunning = true;
+				}
 			}
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraSystem,CachedDestination);
 		}
 		FollowTime = 0.f;
 		bTargeting = false;
