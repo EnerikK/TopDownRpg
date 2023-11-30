@@ -26,6 +26,7 @@ class AURA_API AAuraCharacterBase : public ACharacter , public IAbilitySystemInt
 public:
 	
 	AAuraCharacterBase();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
@@ -33,6 +34,7 @@ public:
 	/*Combat Interface*/
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
+	virtual FOnDeathSignature& GetOnDeath() override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) override;
 	virtual  bool IsDead_Implementation() const override;
 	virtual AActor* GetAvatar_Implementation() override;
@@ -44,9 +46,11 @@ public:
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath GetOnDeathDelegate() override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
 	/*EndCombat Interface*/
 	
 	FOnASCRegistered OnAscRegistered;
+	FOnDeathSignature OnDeathDelegate;
 	
 	FOnDeath OnDeath;
 	
@@ -55,6 +59,11 @@ public:
 
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TArray<FTaggedMontage> AttackMontages;
+
+	UPROPERTY(Replicated,BlueprintReadOnly)
+	bool bIsStunned = false;
+
+	
 	
 protected:
 	
@@ -76,6 +85,11 @@ protected:
 	FName TailSocketName;
 
 	bool bDead = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
+	float BaseWalkSpeed = 600.f;
+
+	virtual void StunnedTagChanged(const FGameplayTag CallbackTag , int32 NewCount);
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

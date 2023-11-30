@@ -243,8 +243,10 @@ void UAuraAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
+
 	
 	Effect->InheritableGameplayEffectTags.AddTag(GameplayTags.DamageTypesDebuffs[DamageType]);
+	//335 39min 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;
 

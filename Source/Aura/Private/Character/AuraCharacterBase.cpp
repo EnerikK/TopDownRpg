@@ -8,7 +8,9 @@
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -35,6 +37,13 @@ AAuraCharacterBase::AAuraCharacterBase()
 	
 }
 
+void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AAuraCharacterBase,bIsStunned);
+}
+
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
@@ -49,6 +58,11 @@ void AAuraCharacterBase::Die(const FVector& DeathImpulse)
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld,true));
 	MultiCastHandleDeath(DeathImpulse);
+}
+
+FOnDeathSignature& AAuraCharacterBase::GetOnDeath()
+{
+	return OnDeathDelegate;
 }
 
 void AAuraCharacterBase::MultiCastHandleDeath_Implementation(const FVector& DeathImpulse)
@@ -73,7 +87,14 @@ void AAuraCharacterBase::MultiCastHandleDeath_Implementation(const FVector& Deat
 	bDead = true;
 
 	BurnDebuffComponent->Deactivate();
+	OnDeathDelegate.Broadcast(this);
 	
+}
+
+void AAuraCharacterBase::StunnedTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bIsStunned = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
 }
 
 // Called when the game starts or when spawned
@@ -166,8 +187,14 @@ FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
 	return OnDeath;
 }
 
+USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()
+{
+	return Weapon;
+}
+
 void AAuraCharacterBase::InitAbilityActorInfo()
 {
+	
 }
 
 void AAuraCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level)const 

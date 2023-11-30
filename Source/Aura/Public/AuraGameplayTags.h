@@ -33,7 +33,6 @@ public:
 	FGameplayTag Attributes_Secondary_MaxMana;
 
 	FGameplayTag Attributes_Meta_IncomingXP;
-
 	
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
@@ -64,10 +63,6 @@ public:
 	FGameplayTag Debuff_Damage;
 	FGameplayTag Debuff_Duration;
 	FGameplayTag Debuff_Frequency;
-	
-
-
-
 	
 	FGameplayTag Abilities_None;
 	
@@ -110,6 +105,11 @@ public:
 	
 	FGameplayTag Effects_HitReact;
 
+	FGameplayTag Player_Block_InputPressed;
+	FGameplayTag Player_Block_InputHeld;
+	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_CursorTrace;
+	
 private:
     static FAuraGameplayTags GameplayTags;
 };
