@@ -33,10 +33,6 @@ struct FTaggedMontage
 	USoundBase* ImpactSound = nullptr;
 
 };
-
-
-
-
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI,BlueprintType)
 class UCombatInterface : public UInterface

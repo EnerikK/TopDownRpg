@@ -109,8 +109,6 @@ public:
 
 	virtual bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess) override;
 	
-	
-
 protected:
 	
 	UPROPERTY()
