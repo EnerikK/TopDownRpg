@@ -11,6 +11,7 @@
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerController.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -130,7 +131,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 {
 	Super::PostGameplayEffectExecute(Data);
 	
-
 	FEffectProperties Props;
 	SetEffectProperties(Data,Props);
 
@@ -225,7 +225,6 @@ void UAuraAttributeSet::HandleIncomingExp(const FEffectProperties& Props)
 		IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalIncomingXP);
 	}
 }
-
 void UAuraAttributeSet::Debuff(const FEffectProperties& Props)
 {
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
@@ -244,8 +243,17 @@ void UAuraAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
 
+	const FGameplayTag DebuffTag = GameplayTags.DamageTypesDebuffs[DamageType];
+	Effect->InheritableGameplayEffectTags.AddTag(DebuffTag);
 	
-	Effect->InheritableGameplayEffectTags.AddTag(GameplayTags.DamageTypesDebuffs[DamageType]);
+	if(DebuffTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+	{ 
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_CursorTrace);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputHeld);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputPressed);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputReleased);
+	}
+	
 	//335 39min 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;

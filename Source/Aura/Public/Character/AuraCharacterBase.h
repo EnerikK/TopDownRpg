@@ -44,14 +44,13 @@ public:
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void IncrementMinionCount_Implementation(int32 Amount) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath GetOnDeathDelegate() override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
 	/*EndCombat Interface*/
 	
 	FOnASCRegistered OnAscRegistered;
 	FOnDeathSignature OnDeathDelegate;
-	
 	FOnDeath OnDeath;
 	
 	UFUNCTION(NetMulticast,Reliable)
@@ -60,11 +59,21 @@ public:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TArray<FTaggedMontage> AttackMontages;
 
-	UPROPERTY(Replicated,BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing=OnRep_Stunned,BlueprintReadOnly)
 	bool bIsStunned = false;
 
+	UPROPERTY(ReplicatedUsing=OnRep_Burned,BlueprintReadOnly)
+	bool bIsBurned = false;
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
 	
-	
+	UFUNCTION()
+	virtual void OnRep_Burned();
+
+	virtual void StunnedTagChanged(const FGameplayTag CallbackTag , int32 NewCount);
+
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -88,9 +97,7 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
 	float BaseWalkSpeed = 600.f;
-
-	virtual void StunnedTagChanged(const FGameplayTag CallbackTag , int32 NewCount);
-
+	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
@@ -145,6 +152,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
+	
 	
 private:
 	UPROPERTY(EditAnywhere,Category="Abilities")

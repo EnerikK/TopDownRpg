@@ -162,7 +162,6 @@ bool UAuraAbilitySystemLibrary::IsSuccessfulDebuff(const FGameplayEffectContextH
 		return AuraEffectContext->IsSuccessfulDebuff();
 	}
 	return false;
-	
 }
 
 float UAuraAbilitySystemLibrary::GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle)
