@@ -6,7 +6,6 @@
 #include "UObject/Interface.h"
 #include "PlayerInterface.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UPlayerInterface : public UInterface
 {
@@ -52,9 +51,13 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void AddToSpellPoints(int32 InSpellPoints);
-
 	
-
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUP();
+
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void HideMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
 };

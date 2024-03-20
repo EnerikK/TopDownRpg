@@ -68,10 +68,7 @@ void AAuraCharacter::AddToXP_Implementation(int32 InXP)
 
 void AAuraCharacter::LevelUP_Implementation()
 {
-
 	MulticastLevelUpParticles();
-	
-	
 }
 void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
 {
@@ -155,7 +152,22 @@ int32 AAuraCharacter::GetSpellPoints_Implementation() const
 	check(AuraPlayerState);
 	return AuraPlayerState->GetSpellPoints();
 }
-
+void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if(AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->ShowMagicCircle(DecalMaterial);
+		AuraPlayerController->bShowMouseCursor = false;
+	}
+}
+void AAuraCharacter::HideMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if(AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->HideMagicCircle();
+		AuraPlayerController->bShowMouseCursor = true;
+	}
+}
 int32 AAuraCharacter::GetPlayerLevel_Implementation()
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
