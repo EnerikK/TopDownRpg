@@ -2,12 +2,11 @@
 
 
 #include "Actor/AuraProjectile.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
@@ -38,6 +37,7 @@ void AAuraProjectile::OnHit()
 {
 	UGameplayStatics::PlaySoundAtLocation(this,ImpactSound,GetActorLocation(),FRotator::ZeroRotator);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ImpactEffect,GetActorLocation());
+	
 	if(LoopingSoundComponent)
 	{
 		LoopingSoundComponent->Stop();
@@ -108,5 +108,6 @@ bool AAuraProjectile::IsValidOverlap(AActor* OtherActor)
 	return true;
 	
 }
+
 
 
