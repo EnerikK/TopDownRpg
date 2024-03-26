@@ -10,19 +10,20 @@
 void UMVVM_LoadScreen::InitializeLoadSlots()
 {
 	LoadSlot_0 = NewObject<UMVVM_LoadSlot>(this,LoadSlotViewModelClass);
-	LoadSlot_0->LoadSlotName = FString("LoadSlot_0");
+	LoadSlot_0->SetLoadSlotName(FString("LoadSlot_0")); 
 	LoadSlot_0->SlotIndex = 0;
 	LoadSlot.Add(0,LoadSlot_0);
 	
 	LoadSlot_1 = NewObject<UMVVM_LoadSlot>(this,LoadSlotViewModelClass);
-	LoadSlot_1->LoadSlotName = FString("LoadSlot_1");
+	LoadSlot.Add(1,LoadSlot_1);
+	LoadSlot_1->SetLoadSlotName(FString("LoadSlot_1"));
 	LoadSlot_1->SlotIndex = 1;
-	LoadSlot.Add(1,LoadSlot_0);
 	
 	LoadSlot_2 = NewObject<UMVVM_LoadSlot>(this,LoadSlotViewModelClass);
-	LoadSlot_2->LoadSlotName = FString("LoadSlot_2");
+	LoadSlot.Add(2,LoadSlot_2);
+	LoadSlot_2->SetLoadSlotName(FString("LoadSlot_2")); 
 	LoadSlot_2->SlotIndex = 2;
-	LoadSlot.Add(2,LoadSlot_0);
+
 
 
 }
@@ -37,10 +38,8 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString EnteredNam
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
 	LoadSlot[Slot]->SetMapName(AuraGameMode->DefaultMapName);
-	
 	LoadSlot[Slot]->SetPlayerName(EnteredName);
 	LoadSlot[Slot]->SlotStatus = Taken;
-
 	
 	AuraGameMode->SaveSlotData(LoadSlot[Slot],Slot);
 	LoadSlot[Slot]->InitializeSlot();
@@ -70,7 +69,7 @@ void UMVVM_LoadScreen::DeleteButtonPressed(int32 Slot)
 {
 	if(IsValid(SelectedSlot))
 	{
-		AAuraGameModeBase::DeleteSlot(SelectedSlot->LoadSlotName,SelectedSlot->SlotIndex);
+		AAuraGameModeBase::DeleteSlot(SelectedSlot->GetLoadSlotName(),SelectedSlot->SlotIndex);
 		SelectedSlot->SlotStatus = Vacant;
 		SelectedSlot->InitializeSlot();
 		SelectedSlot->EnableSelectSlotButton.Broadcast(true);
@@ -92,7 +91,7 @@ void UMVVM_LoadScreen::LoadData()
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 	for (const TTuple<int32,UMVVM_LoadSlot*> Slot : LoadSlot)
 	{
-		ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData(Slot.Value->LoadSlotName,Slot.Key);
+		ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData(Slot.Value->GetLoadSlotName(),Slot.Key);
 
 		const FString PlayerName = SaveObject->PlayerName;
 		TEnumAsByte<ESaveSlotStatus> SaveSlotStatus = SaveObject->SaveSlotStatus;
