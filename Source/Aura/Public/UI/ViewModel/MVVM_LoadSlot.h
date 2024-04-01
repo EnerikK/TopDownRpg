@@ -28,14 +28,15 @@ public:
 	FEnableSelectSlotButton EnableSelectSlotButton;
 
 	void InitializeSlot();
-
-
 	
 	UPROPERTY()
 	int32 SlotIndex;
 
 	UPROPERTY()
 	TEnumAsByte<ESaveSlotStatus> SlotStatus;
+
+	UPROPERTY()
+	FName PlayerStartTag;
 	
 	/*Field Notify */
 	
